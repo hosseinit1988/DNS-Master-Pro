@@ -1,0 +1,242 @@
+# 🌐 DNS Master Switcher | سوئیچر حرفه‌ای DNS
+
+[![Version](https://img.shields.io/badge/version-1.0-blue.svg)](https://github.com/hosseinit1988)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Ubuntu](https://img.shields.io/badge/Ubuntu-20.04+-orange.svg)](https://ubuntu.com)
+
+## 📖 فهرست مطالب
+
+| بخش | توضیح |
+|------|------|
+| 🧭 معرفی | آشنایی با پروژه |
+| ✨ ویژگی‌ها | قابلیت‌های کلیدی |
+| 📋 پیش‌نیازها | نیازمندی‌های سیستم |
+| 📥 دریافت پروژه | روش‌های دانلود |
+| 🚀 نصب و اجرا | دستورات گام‌به‌گام |
+| 🗺️ DNS های داخلی | لیست DNS های ایران |
+| 🌍 DNS های بین‌المللی | لیست DNS های جهانی |
+| 🔐 DNS-over-TLS | فعال‌سازی DoT |
+| ➕ افزودن DNS سفارشی | ذخیره دائمی |
+| 📺 خروجی نمونه | نمایش ترمینال |
+| 🔧 عیب‌یابی | حل مشکلات |
+| ❓ سوالات متداول | پاسخ به سوالات |
+| ⚠️ نکات قانونی | ملاحظات اخلاقی |
+
+---
+
+## 🧭 معرفی
+
+**DNS Master Switcher** یک اسکریپت Bash حرفه‌ای برای مدیریت DNS در اوبونتو ۲۰ به بالاست.
+
+| ردیف | قابلیت | توضیح |
+|------|--------|-------|
+| ۱ | 🔄 تغییر سریع DNS | سوییچ بین ۲۰+ DNS |
+| ۲ | 🔒 پشتیبانی از DoT | DNS‑over‑TLS |
+| ۳ | ➕ DNS سفارشی | افزودن و ذخیره دائمی |
+| ۴ | 💾 ذخیره خودکار | در فایل کانفیگ |
+| ۵ | 📊 نمایش وضعیت | DNS فعلی و DoT |
+| ۶ | 🔄 بازنشانی DHCP | برگشت به پیش‌فرض |
+
+---
+
+## ✨ ویژگی‌ها
+
+| ویژگی | توضیح |
+|-------|-------|
+| 🎨 رابط کاربری زیبا | منوی رنگی و حرفه‌ای |
+| 🚀 سرعت بالا | تغییر در کمتر از ۱ ثانیه |
+| 🇮🇷 DNS های ایرانی | Shecan, Radar, Electro, Begzar, 403, ... |
+| 🌍 DNS های جهانی | Google, Cloudflare, Quad9, OpenDNS, ... |
+| 🔐 DNS-over-TLS | قابلیت فعال‌سازی DoT |
+| 💾 ذخیره دائمی | در `~/.dns_switcher_custom.conf` |
+| 📋 پشتیبان خودکار | از `/etc/resolv.conf` |
+
+---
+
+## 📋 پیش‌نیازها
+
+| مورد | توضیح | حداقل نیاز |
+|------|-------|------------|
+| 🐧 سیستم عامل | اوبونتو | 20.04+ |
+| 👑 دسترسی root | نیاز به sudo | دارد |
+| 📦 systemd-resolved | پیش‌فرض نصب است | دارد |
+| 💻 bash | شل پیش‌فرض | نسخه ۴+ |
+
+---
+
+## 📥 دریافت پروژه
+
+| روش | دستور |
+|------|-------|
+| 🔹 دانلود مستقیم | [کلیک کنید](https://github.com/hosseinit1988/DNS-Master-Pro/archive/refs/heads/main.zip) |
+| 🔹 با Git | `git clone https://github.com/hosseinit1988/DNS-Master-Pro.git` |
+
+```bash
+cd DNS-Master-Pro
+```
+
+---
+
+## 🚀 نصب و اجرا
+
+| مرحله | دستور |
+|-------|-------|
+| ۱ | `chmod +x DNS-Master-Pro.sh` |
+| ۲ | `sudo ./DNS-Master-Pro.sh` |
+
+---
+
+## 🗺️ DNS های داخلی (ایران)
+
+| نام DNS | آیپی اول | آیپی دوم |
+|---------|----------|----------|
+| Shecan | 178.22.122.100 | 185.51.200.2 |
+| Radar | 10.202.10.10 | 10.202.10.11 |
+| Electro | 78.157.42.100 | 78.157.42.101 |
+| Begzar | 185.55.226.26 | 185.55.226.25 |
+| DNS Pro | 87.107.110.109 | 87.107.110.110 |
+| 403 | 10.202.10.202 | 10.202.10.102 |
+| MCI | 208.67.220.200 | 208.67.222.222 |
+| MTN-Irancel | 74.82.42.42 | - |
+| Rightel | 91.239.100.100 | 89.223.43.71 |
+
+---
+
+## 🌍 DNS های بین‌المللی
+
+| نام DNS | آیپی اول | آیپی دوم |
+|---------|----------|----------|
+| Google | 8.8.8.8 | 8.8.4.4 |
+| Cloudflare | 1.1.1.1 | 1.0.0.1 |
+| Quad9 | 9.9.9.9 | 149.112.112.112 |
+| OpenDNS | 208.67.222.222 | 208.67.220.220 |
+| AdGuard | 94.140.14.14 | 94.140.15.15 |
+| Verisign | 64.6.64.6 | 64.6.65.6 |
+| NTT | 129.250.35.250 | 129.250.35.251 |
+
+---
+
+## 🔐 DNS-over-TLS (DoT)
+
+| گزینه | توضیح |
+|-------|-------|
+| T) Toggle DoT | فعال/غیرفعال کردن DNS‑over‑TLS |
+| حالت پیش‌فرض | opportunistic |
+
+---
+
+## ➕ افزودن DNS سفارشی
+
+| مرحله | توضیح |
+|-------|-------|
+| ۱ | گزینه A را از منو انتخاب کنید |
+| ۲ | نام دلخواه وارد کنید (مثل MyDNS) |
+| ۳ | آیپی اصلی را وارد کنید |
+| ۴ | آیپی ثانویه (اختیاری) را وارد کنید |
+| ✅ | به صورت خودکار در `~/.dns_switcher_custom.conf` ذخیره می‌شود |
+
+---
+
+## 📺 خروجی نمونه
+
+```
+╔══════════════════════════════════════════════════════╗
+║         DNS Master Switcher by Hossein Shourgashti   ║
+║        github.com/hosseinit1988                      ║
+╚══════════════════════════════════════════════════════╝
+
+[*] Current DNS Configuration:
+   Link 2 (eth0): 8.8.8.8 8.8.4.4
+
+[*] DNS-over-TLS Status: no
+
+Available DNS Providers:
+-----------------------------------------
+   1) Shecan           : 178.22.122.100 185.51.200.2
+   2) Radar            : 10.202.10.10 10.202.10.11
+   3) Google           : 8.8.8.8 8.8.4.4
+   4) Cloudflare       : 1.1.1.1 1.0.0.1
+-----------------------------------------
+   A) Add Custom DNS
+   T) Toggle DNS-over-TLS (DoT)
+   R) Reset to Default (DHCP)
+   0) Exit
+
+  Your choice: 3
+
+[+] Applying 'Google' DNS...
+   ✓ Backup created: /etc/resolv.conf.bak.20250115_143022
+   ✓ DNS successfully switched to Google.
+   ✓ Servers: 8.8.8.8, 8.8.4.4
+```
+
+---
+
+## 🔧 عیب‌یابی
+
+| مشکل | راه‌حل |
+|------|-------|
+| باید به صورت root اجرا شود | از `sudo` استفاده کنید |
+| سیستم systemd-resolved ندارد | `sudo apt install systemd-resolved` |
+| interface شناسایی نمی‌شود | `ip link show` را ببینید |
+| DNS تغییر نمی‌کند | `sudo systemctl restart systemd-resolved` |
+
+---
+
+## ❓ سوالات متداول
+
+| سوال | پاسخ |
+|------|-------|
+| چرا باید DNS را عوض کنم؟ | برای سرعت بیشتر، امنیت و دسترسی به سایت‌ها |
+| DoT چیست؟ | DNS‑over‑TLS - رمزنگاری درخواست‌های DNS |
+| آیا به اینترنت آسیب می‌زند؟ | خیر، فقط DNS را تغییر می‌دهد |
+| چگونه به تنظیمات اولیه برگردم؟ | گزینه R در منو |
+| DNS های سفارشی کجا ذخیره می‌شوند؟ | `~/.dns_switcher_custom.conf` |
+
+---
+
+## ⚠️ نکات قانونی
+
+| عنوان | توضیح |
+|-------|-------|
+| 🎯 هدف | فقط برای آموزش و بهبود حریم خصوصی |
+| 📜 قانونی | تغییر DNS در اکثر کشورها قانونی است |
+| ❌ سوءاستفاده | از این ابزار برای مقاصد غیرقانونی استفاده نکنید |
+| 📄 مسئولیت | نویسنده مسئولیتی در قبال استفاده نادرست ندارد |
+
+---
+
+## 📄 لایسنس
+
+این پروژه تحت مجوز **MIT** منتشر شده است.
+
+```
+MIT License
+
+Copyright (c) 2025 Hossein Shourgashti (hosseinit1988)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions...
+```
+
+---
+
+## 🤝 مشارکت
+
+| روش | توضیح |
+|------|-------|
+| ⭐ ستاره | حمایت از پروژه |
+| 🐛 گزارش مشکل | Issue جدید باز کنید |
+| 🔧 Pull Request | پیشنهاد بهبود |
+| 📢 اشتراک‌گذاری | با دیگران به اشتراک بگذارید |
+
+---
+
+**توسعه داده شده با ❤️ برای جامعه متن‌باز ایران و جهان**
+
+**نویسنده:** Hossein Shourgashti (hosseinit1988)  
+**گیت‌هاب:** [github.com/hosseinit1988](https://github.com/hosseinit1988)
