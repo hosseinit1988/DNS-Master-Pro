@@ -55,7 +55,7 @@
 
 ---
 
-## 📋 پیش‌نیازها
+## 📋 پیشنیازها
 
 | مورد | توضیح | حداقل نیاز |
 |------|-------|------------|
@@ -66,7 +66,7 @@
 
 ---
 
-## 🚀 نصب یک خطی (سریع‌ترین روش)
+## 🚀 نصب یک خطی سریع‌ترین روش
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/hosseinit1988/DNS-Master-Pro/main/DNS-Master-Pro.sh)
