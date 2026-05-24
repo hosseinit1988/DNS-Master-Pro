@@ -11,8 +11,8 @@
 | 🧭 معرفی | آشنایی با پروژه |
 | ✨ ویژگی‌ها | قابلیت‌های کلیدی |
 | 📋 پیش‌نیازها | نیازمندی‌های سیستم |
-| 📥 دریافت پروژه | روش‌های دانلود |
-| 🚀 نصب و اجرا | دستورات گام‌به‌گام |
+| 🚀 نصب یک خطی | سریع‌ترین روش اجرا |
+| 📥 دریافت پروژه | روش‌های دیگر دانلود |
 | 🗺️ DNS های داخلی | لیست DNS های ایران |
 | 🌍 DNS های بین‌المللی | لیست DNS های جهانی |
 | 🔐 DNS-over-TLS | فعال‌سازی DoT |
@@ -60,29 +60,27 @@
 | 🐧 سیستم عامل | اوبونتو | 20.04+ |
 | 👑 دسترسی root | نیاز به sudo | دارد |
 | 📦 systemd-resolved | پیش‌فرض نصب است | دارد |
-| 💻 bash | شل پیش‌فرض | نسخه ۴+ |
+| 🌐 اتصال اینترنت | برای دانلود | دارد |
 
 ---
 
-## 📥 دریافت پروژه
+## 🚀 نصب یک خطی (سریع‌ترین روش)
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/hosseinit1988/DNS-Master-Pro/main/DNS-Master-Pro.sh)
+```
+
+**فقط کافی است این دستور را در ترمینال کپی و اجرا کنید!**
+
+---
+
+## 📥 دریافت پروژه (روش‌های دیگر)
 
 | روش | دستور |
 |------|-------|
 | 🔹 دانلود مستقیم | [کلیک کنید](https://github.com/hosseinit1988/DNS-Master-Pro/archive/refs/heads/main.zip) |
 | 🔹 با Git | `git clone https://github.com/hosseinit1988/DNS-Master-Pro.git` |
-
-```bash
-cd DNS-Master-Pro
-```
-
----
-
-## 🚀 نصب و اجرا
-
-| مرحله | دستور |
-|-------|-------|
-| ۱ | `chmod +x DNS-Master-Pro.sh` |
-| ۲ | `sudo ./DNS-Master-Pro.sh` |
+| 🔹 اجرای محلی | `chmod +x DNS-Master-Pro.sh && sudo ./DNS-Master-Pro.sh` |
 
 ---
 
@@ -176,9 +174,9 @@ Available DNS Providers:
 
 | مشکل | راه‌حل |
 |------|-------|
-| باید به صورت root اجرا شود | از `sudo` استفاده کنید |
-| سیستم systemd-resolved ندارد | `sudo apt install systemd-resolved` |
-| interface شناسایی نمی‌شود | `ip link show` را ببینید |
+| باید به صورت root اجرا شود | دستور با `sudo` اجرا می‌شود |
+| curl: command not found | `sudo apt install curl -y` |
+| سیستم systemd-resolved ندارد | `sudo apt install systemd-resolved -y` |
 | DNS تغییر نمی‌کند | `sudo systemctl restart systemd-resolved` |
 
 ---
@@ -217,10 +215,7 @@ Copyright (c) 2025 Hossein Shourgashti (hosseinit1988)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions...
+in the Software without restriction...
 ```
 
 ---
