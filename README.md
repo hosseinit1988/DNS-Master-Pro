@@ -1,112 +1,98 @@
-# Ubuntu Repository Iran 🇮🇷
+# 🌐 DNS Master Pro
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)  
-[![Ubuntu](https://img.shields.io/badge/Ubuntu-18.04%20%7C%2020.04%20%7C%2022.04-orange)](https://ubuntu.com)
+**Advanced DNS Management Tool for Ubuntu 20+ & Modern Linux Distributions**
 
-این پروژه شامل یک اسکریپت ساده و کاربردی برای تغییر مخازن (Repositories) اوبونتو به **مخازن داخلی ایران** است.  
-با اجرای این اسکریپت، سرعت دانلود پکیج‌ها افزایش یافته و دسترسی به مخازن پایدارتر می‌شود.
-
----
-
-## 🚀 نصب و اجرا
-
-برای اجرای مستقیم اسکریپت، کافیست دستور زیر را در ترمینال وارد کنید:
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/hosseinit1988/Ubuntu-Repository-iran/main/mirrors.sh)
-```
+[![Ubuntu](https://img.shields.io/badge/Ubuntu-20.04%2B-E95420?style=flat-square&logo=ubuntu&logoColor=white)](https://ubuntu.com/)
+[![Bash](https://img.shields.io/badge/Bash-5.0%2B-4EAA25?style=flat-square&logo=gnu-bash&logoColor=white)](https://www.gnu.org/software/bash/)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
+[![Author](https://img.shields.io/badge/Author-Hossein_Shourgashti-purple?style=flat-square)](https://github.com/hosseinit1988)
 
 ---
 
-## 📋 پیش‌نیازها
-- سیستم‌عامل **Ubuntu** (تست‌شده روی نسخه‌های 18.04، 20.04، 22.04)  
-- دسترسی به کاربر **root** یا **sudo**
+## ✨ Features | ویژگی‌ها
+
+🎨 Beautiful Interactive Menu with colorful interface
+🚀 30+ Pre-configured DNS Providers (Shecan, Radar, Electro, Google, Cloudflare, AdGuard & more)
+➕ Add Custom DNS permanently from the menu without editing script code
+🔐 DNS-over-TLS (DoT) toggle support for encrypted DNS queries
+🔄 One-Click Reset to default DHCP settings
+💾 Automatic Backup before any DNS changes
+🔍 Auto-Detect Network Interface (no manual configuration needed)
+📊 Live Status Display of current DNS and DoT configuration
+📁 Persistent Settings using systemd-resolved (survives reboots)
 
 ---
 
-## ⚡ امکانات
-- تغییر خودکار مخازن رسمی اوبونتو به مخازن داخلی ایران  
-- پشتیبانی از نسخه‌های مختلف اوبونتو  
-- سریع، ساده و بدون نیاز به تنظیمات دستی  
+## 🆚 Why DNS Master Pro? | چرا DNS Master Pro؟
+
+| Feature | DNS Master Pro | Typical Scripts |
+|---------|:------------:|:---------------:|
+| Method | resolvectl (systemd) | Direct file edit |
+| Persistence | Survives reboots | May revert |
+| Ubuntu 20+ | Fully optimized | Not optimized |
+| DoT Support | Built-in toggle | Not available |
+| Add Custom DNS | From menu | Edit source code |
+| Auto Interface | Automatic | Manual |
+| Backup | Automatic | Usually manual |
+| Status Display | DNS + DoT live | Limited |
 
 ---
 
-## 📦 استفاده پس از نصب
-بعد از اجرای اسکریپت کافیست دستور زیر را اجرا کنید:
+## 📋 Requirements | نیازمندی‌ها
 
-```bash
-sudo apt update && sudo apt upgrade -y
-```
-
----
-
-## 🛠 توسعه‌دهنده
-- 👨‍💻 نویسنده: [Hossein.IT](https://github.com/hosseinit1988)  
-- 📌 پروژه متن‌باز است؛ خوشحال می‌شوم اگر آن را Fork کنید یا Pull Request ارسال کنید.  
+Ubuntu 20.04, 22.04, 24.04 or later (primary target)
+Any systemd-based Linux (Debian 11+, Fedora 33+, Arch)
+Root privileges (sudo access required)
+systemd-resolved service enabled (default on Ubuntu)
+Bash 5.0+ (default on modern distributions)
 
 ---
 
-## ⚠️ نکته مهم
-- این اسکریپت فقط برای کاربران **داخل ایران** طراحی شده است.  
-- استفاده در خارج از ایران ممکن است باعث کندی در دریافت بسته‌ها شود.  
+## 🚀 Quick Start | شروع سریع
+
+git clone https://github.com/hosseinit1988/DNS-Master-Pro.git
+cd DNS-Master-Pro
+chmod +x dns-master.sh
+sudo ./dns-master.sh
+
+wget https://raw.githubusercontent.com/hosseinit1988/DNS-Master-Pro/main/dns-master.sh
+chmod +x dns-master.sh
+sudo ./dns-master.sh
+
+bash <(curl -s https://raw.githubusercontent.com/hosseinit1988/DNS-Master-Pro/main/dns-master.sh)
 
 ---
 
-## ⭐ حمایت
-اگر این پروژه برایتان مفید بود، لطفاً با زدن ⭐ در گیتهاب از من حمایت کنید.  
+## 📖 Usage Guide | راهنمای استفاده
+
+Press 1-30+ to select a pre-configured DNS provider
+Press A to add your own custom DNS permanently
+Press T to toggle DNS-over-TLS ON/OFF
+Press R to reset to default DHCP settings
+Press 0 to exit the program
 
 ---
 
-# Ubuntu Repository Iran 🇮🇷
+## 🌍 DNS Providers | سرویس‌های DNS
 
-This project provides a simple and useful script to change **Ubuntu repositories** to **Iranian local mirrors**.  
-By running this script, package download speed will increase and access to repositories will be more stable.
-
----
-
-## 🚀 Installation & Usage
-
-Run the following command in your terminal:
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/hosseinit1988/Ubuntu-Repository-iran/main/mirrors.sh)
-```
+Shecan, Radar, Electro, Begzar, DNS Pro, 403, MCI, MTN-Irancel, Rightel
+Google, Cloudflare, Quad9, OpenDNS, AdGuard, Verisign, NTT, DNS-XBOX
 
 ---
 
-## 📋 Requirements
-- **Ubuntu OS** (tested on 18.04, 20.04, 22.04)  
-- **root** or **sudo** privileges  
+## 👨‍💻 Author | نویسنده
+
+**Hossein Shourgashti**
+GitHub: github.com/hosseinit1988
+Website: hetzner.com
+Live In Linux | WebDesigner | SQL Administrator | Network Security
 
 ---
 
-## ⚡ Features
-- Automatically switch official Ubuntu repositories to Iranian mirrors  
-- Supports multiple Ubuntu versions  
-- Fast, simple, no manual configuration required  
+## 📝 License | مجوز
+
+MIT License - see LICENSE file for details
 
 ---
 
-## 📦 After Installation
-Update your packages list with:
-
-```bash
-sudo apt update && sudo apt upgrade -y
-```
-
----
-
-## 🛠 Developer
-- 👨‍💻 Author: [Hossein.IT](https://github.com/hosseinit1988)  
-- 📌 Open-source project – feel free to Fork or send a Pull Request.  
-
----
-
-## ⚠️ Notes
-- This script is mainly designed for **users inside Iran**.  
-- Using it outside Iran may slow down package downloads.  
-
----
-
-## ⭐ Support
-If you find this project useful, please give it a ⭐ on GitHub!
+Made with ❤️ by Hossein Shourgashti
