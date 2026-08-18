@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # ======================================================
 # DNS Master Pro - Graphical Edition (TUI)
 # Author: Based on original by Hossein Shourgashti
@@ -24,7 +23,57 @@ DIALOG_HEIGHT=20
 DIALOG_WIDTH=75
 declare -A DNS_SERVERS
 
-# --- Check if running as root ---
+# ======================================================
+# AUTO-INSTALL MISSING DEPENDENCIES
+# ======================================================
+auto_install_deps() {
+    local deps=("dialog" "resolvectl" "systemctl" "dig")
+    local missing=()
+    local to_install=()
+    
+    for dep in "${deps[@]}"; do
+        if ! command -v "$dep" &> /dev/null; then
+            missing+=("$dep")
+            case "$dep" in
+                dialog) to_install+=("dialog") ;;
+                resolvectl|systemctl) to_install+=("systemd-resolved") ;;
+                dig) to_install+=("dnsutils") ;;
+            esac
+        fi
+    done
+    
+    if [ ${#missing[@]} -gt 0 ]; then
+        echo -e "\033[1;33m[!] Missing dependencies: ${missing[*]}\033[0m"
+        echo -e "\033[1;34m[*] Attempting to install required packages...\033[0m"
+        
+        if command -v apt &> /dev/null; then
+            sudo apt update 2>/dev/null
+            sudo apt install -y "${to_install[@]}" 2>/dev/null
+        elif command -v dnf &> /dev/null; then
+            sudo dnf install -y "${to_install[@]}" 2>/dev/null
+        elif command -v yum &> /dev/null; then
+            sudo yum install -y "${to_install[@]}" 2>/dev/null
+        else
+            echo -e "\033[1;31m[✗] No package manager found. Please install manually: ${to_install[*]}\033[0m"
+            exit 1
+        fi
+        
+        # Verify installation
+        for dep in "${missing[@]}"; do
+            if ! command -v "$dep" &> /dev/null; then
+                echo -e "\033[1;31m[✗] Failed to install $dep. Please install manually.\033[0m"
+                exit 1
+            fi
+        done
+        echo -e "\033[1;32m[✓] All dependencies installed successfully!\033[0m"
+        sleep 2
+        clear
+    fi
+}
+
+# ======================================================
+# CHECK ROOT PERMISSIONS
+# ======================================================
 check_root() {
     if [ "$EUID" -ne 0 ]; then
         dialog --title "Permission Error" --msgbox "Please run this script as root:\nsudo $0" 8 50
@@ -32,27 +81,12 @@ check_root() {
     fi
 }
 
-# --- Check and install dependencies ---
-check_dependencies() {
-    local deps=("dialog" "resolvectl" "systemctl" "dig")
-    local missing=()
-    
-    for dep in "${deps[@]}"; do
-        if ! command -v "$dep" &> /dev/null; then
-            missing+=("$dep")
-        fi
-    done
-    
-    if [ ${#missing[@]} -gt 0 ]; then
-        dialog --title "Missing Dependencies" \
-               --msgbox "The following packages are required:\n\n${missing[*]}\n\nInstall them using:\nsudo apt install dialog dnsutils systemd-resolved" 12 60
-        exit 1
-    fi
-}
-
-# --- Initialize default DNS providers ---
+# ======================================================
+# INITIALIZE DNS PROVIDERS
+# ======================================================
 init_defaults() {
     DNS_SERVERS=(
+        # Iranian & Regional Providers
         ["Shecan"]="178.22.122.100 185.51.200.2"
         ["Radar"]="10.202.10.10 10.202.10.11"
         ["Electro"]="78.157.42.100 78.157.42.101"
@@ -62,6 +96,7 @@ init_defaults() {
         ["MCI"]="208.67.220.200 208.67.222.222"
         ["MTN-Irancel"]="74.82.42.42"
         ["Rightel"]="91.239.100.100 89.223.43.71"
+        # International Public DNS
         ["Google"]="8.8.8.8 8.8.4.4"
         ["Cloudflare"]="1.1.1.1 1.0.0.1"
         ["Quad9"]="9.9.9.9 149.112.112.112"
@@ -74,7 +109,9 @@ init_defaults() {
     load_custom
 }
 
-# --- Load custom DNS entries ---
+# ======================================================
+# LOAD CUSTOM DNS ENTRIES
+# ======================================================
 load_custom() {
     if [ -f "$CONFIG_FILE" ]; then
         while IFS='=' read -r key value; do
@@ -84,7 +121,9 @@ load_custom() {
     fi
 }
 
-# --- Save custom DNS entry ---
+# ======================================================
+# SAVE CUSTOM DNS ENTRY
+# ======================================================
 save_custom() {
     local name="$1"
     local ip1="$2"
@@ -92,7 +131,9 @@ save_custom() {
     echo "${name}=${ip1} ${ip2}" >> "$CONFIG_FILE"
 }
 
-# --- Get current DNS servers ---
+# ======================================================
+# GET CURRENT DNS SERVERS
+# ======================================================
 get_current_dns() {
     local interface
     interface=$(ip route get 1.1.1.1 2>/dev/null | grep -oP 'dev \K\S+')
@@ -107,12 +148,16 @@ get_current_dns() {
     fi
 }
 
-# --- Get DNS-over-TLS status ---
+# ======================================================
+# GET DNS-OVER-TLS STATUS
+# ======================================================
 get_dot_status() {
     resolvectl status 2>/dev/null | grep "DNS-over-TLS" | head -n1 | awk '{print $NF}'
 }
 
-# --- Change DNS using resolvectl ---
+# ======================================================
+# CHANGE DNS USING RESOLVECTL
+# ======================================================
 set_dns() {
     local provider_name="$1"
     local dns_ips="$2"
@@ -139,7 +184,9 @@ set_dns() {
     dialog --title "Success" --msgbox "DNS switched to: $provider_name\nServers: ${dns_ips// /, }" 8 50
 }
 
-# --- Toggle DNS-over-TLS ---
+# ======================================================
+# TOGGLE DNS-OVER-TLS
+# ======================================================
 toggle_dot() {
     local current_status
     current_status=$(get_dot_status)
@@ -155,7 +202,9 @@ toggle_dot() {
     fi
 }
 
-# --- Reset DNS to default (DHCP) ---
+# ======================================================
+# RESET DNS TO DEFAULT (DHCP)
+# ======================================================
 reset_to_default() {
     local interface
     interface=$(ip route get 1.1.1.1 2>/dev/null | grep -oP 'dev \K\S+')
@@ -173,7 +222,9 @@ reset_to_default() {
     fi
 }
 
-# --- Add custom DNS ---
+# ======================================================
+# ADD CUSTOM DNS
+# ======================================================
 add_custom_dns() {
     local name=$(dialog --title "Add Custom DNS" --inputbox "Provider Name:" 8 40 3>&1 1>&2 2>&3)
     [ $? -ne 0 ] && return
@@ -198,7 +249,9 @@ add_custom_dns() {
     dialog --title "Success" --msgbox "Custom DNS '$name' added successfully!" 6 40
 }
 
-# --- DNS Benchmark (simple ping test) ---
+# ======================================================
+# DNS BENCHMARK (SIMPLE PING TEST)
+# ======================================================
 benchmark_dns() {
     local servers=("8.8.8.8" "1.1.1.1" "9.9.9.9" "208.67.222.222" "94.140.14.14")
     local results=()
@@ -249,7 +302,9 @@ benchmark_dns() {
     fi
 }
 
-# --- Resolve domain (dig) ---
+# ======================================================
+# RESOLVE DOMAIN (DIG)
+# ======================================================
 resolve_domain() {
     local domain=$(dialog --title "Resolve Domain" --inputbox "Enter domain name:" 8 40 "google.com" 3>&1 1>&2 2>&3)
     [ $? -ne 0 ] && return
@@ -262,7 +317,9 @@ resolve_domain() {
     dialog --title "Resolve Result for $domain" --msgbox "$result" 20 60
 }
 
-# --- Show network information ---
+# ======================================================
+# SHOW NETWORK INFORMATION
+# ======================================================
 show_network_info() {
     local info=""
     info+="===== System Information =====\n"
@@ -285,7 +342,9 @@ show_network_info() {
     dialog --title "Network Information" --msgbox "$info" 25 70
 }
 
-# --- Main Menu ---
+# ======================================================
+# MAIN MENU
+# ======================================================
 main_menu() {
     while true; do
         # Get current info for display
@@ -359,9 +418,11 @@ main_menu() {
     done
 }
 
-# --- Main Execution ---
+# ======================================================
+# MAIN EXECUTION
+# ======================================================
 clear
+auto_install_deps
 check_root
-check_dependencies
 init_defaults
 main_menu
