@@ -85,8 +85,8 @@ save_custom() {
 draw_header() {
     clear
     echo -e "${CYAN}╔══════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║${YELLOW}         DNS Master Switcher ${WHITE}by Hossein Shourgashti${CYAN}      ║${NC}"
-    echo -e "${CYAN}║${WHITE}        github.com/hosseinit1988                     ${CYAN}║${NC}"
+    echo -e "${CYAN}║${YELLOW}   DNS Master Switcher ${WHITE}by Hossein Shourgashti${CYAN}      ║${NC}"
+    echo -e "${CYAN}║${WHITE}    github.com/hosseinit1988                     ${CYAN}║${NC}"
     echo -e "${CYAN}╚══════════════════════════════════════════════════════╝${NC}"
 }
 
