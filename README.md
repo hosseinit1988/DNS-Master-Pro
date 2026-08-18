@@ -71,10 +71,15 @@
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/hosseinit1988/DNS-Master-Pro/main/DNS-Master-Pro.sh)
 ```
+**فقط کافی است این دستور را در ترمینال کپی و اجرا کنید!**
+
+
+```bash
 git clone https://github.com/hosseinit1988/DNS-Master-Pro.git
 cd DNS-Master-Pro
 sudo chmod +x install.sh
 sudo ./install.sh
+```
 **فقط کافی است این دستور را در ترمینال کپی و اجرا کنید!**
 
 ---
