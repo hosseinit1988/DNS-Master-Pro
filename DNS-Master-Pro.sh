@@ -1,12 +1,21 @@
 #!/bin/bash
 # ======================================================
-# DNS Master Pro - Graphical Edition (TUI)
-# Author: Based on original by Hossein Shourgashti
-# Description: Enhanced graphical DNS manager using dialog
-# Dependencies: dialog, resolvectl, systemd-resolved, dig
+# DNS Master Pro - Graphical Edition
 # ======================================================
 
-# --- Color & Dialog Configuration ---
+# --- Check and install dialog if missing ---
+if ! command -v dialog &> /dev/null; then
+    echo "dialog is not installed. Installing..."
+    sudo apt update
+    sudo apt install -y dialog
+    if [ $? -ne 0 ]; then
+        echo "Failed to install dialog. Please install manually:"
+        echo "sudo apt install dialog"
+        exit 1
+    fi
+fi
+
+# --- Dialog Configuration ---
 export DIALOGRC=/dev/null
 export NEWT_COLORS='
 root=,black
@@ -19,100 +28,23 @@ title=cyan,black
 
 # --- Global Variables ---
 CONFIG_FILE="$HOME/.dns_master_pro_custom.conf"
-DIALOG_HEIGHT=20
-DIALOG_WIDTH=75
 declare -A DNS_SERVERS
 
-# ======================================================
-# AUTO-INSTALL MISSING DEPENDENCIES
-# ======================================================
-auto_install_deps() {
-    local deps=("dialog" "resolvectl" "systemctl" "dig")
-    local missing=()
-    local to_install=()
-    
-    for dep in "${deps[@]}"; do
-        if ! command -v "$dep" &> /dev/null; then
-            missing+=("$dep")
-            case "$dep" in
-                dialog) to_install+=("dialog") ;;
-                resolvectl|systemctl) to_install+=("systemd-resolved") ;;
-                dig) to_install+=("dnsutils") ;;
-            esac
-        fi
-    done
-    
-    if [ ${#missing[@]} -gt 0 ]; then
-        echo -e "\033[1;33m[!] Missing dependencies: ${missing[*]}\033[0m"
-        echo -e "\033[1;34m[*] Attempting to install required packages...\033[0m"
-        
-        if command -v apt &> /dev/null; then
-            sudo apt update 2>/dev/null
-            sudo apt install -y "${to_install[@]}" 2>/dev/null
-        elif command -v dnf &> /dev/null; then
-            sudo dnf install -y "${to_install[@]}" 2>/dev/null
-        elif command -v yum &> /dev/null; then
-            sudo yum install -y "${to_install[@]}" 2>/dev/null
-        else
-            echo -e "\033[1;31m[✗] No package manager found. Please install manually: ${to_install[*]}\033[0m"
-            exit 1
-        fi
-        
-        # Verify installation
-        for dep in "${missing[@]}"; do
-            if ! command -v "$dep" &> /dev/null; then
-                echo -e "\033[1;31m[✗] Failed to install $dep. Please install manually.\033[0m"
-                exit 1
-            fi
-        done
-        echo -e "\033[1;32m[✓] All dependencies installed successfully!\033[0m"
-        sleep 2
-        clear
-    fi
-}
-
-# ======================================================
-# CHECK ROOT PERMISSIONS
-# ======================================================
-check_root() {
-    if [ "$EUID" -ne 0 ]; then
-        dialog --title "Permission Error" --msgbox "Please run this script as root:\nsudo $0" 8 50
-        exit 1
-    fi
-}
-
-# ======================================================
-# INITIALIZE DNS PROVIDERS
-# ======================================================
+# --- Initialize DNS providers ---
 init_defaults() {
     DNS_SERVERS=(
-        # Iranian & Regional Providers
-        ["Shecan"]="178.22.122.100 185.51.200.2"
-        ["Radar"]="10.202.10.10 10.202.10.11"
-        ["Electro"]="78.157.42.100 78.157.42.101"
-        ["Begzar"]="185.55.226.26 185.55.226.25"
-        ["DNS Pro"]="87.107.110.109 87.107.110.110"
-        ["403"]="10.202.10.202 10.202.10.102"
-        ["MCI"]="208.67.220.200 208.67.222.222"
-        ["MTN-Irancel"]="74.82.42.42"
-        ["Rightel"]="91.239.100.100 89.223.43.71"
-        # International Public DNS
         ["Google"]="8.8.8.8 8.8.4.4"
         ["Cloudflare"]="1.1.1.1 1.0.0.1"
         ["Quad9"]="9.9.9.9 149.112.112.112"
         ["OpenDNS"]="208.67.222.222 208.67.220.220"
         ["AdGuard"]="94.140.14.14 94.140.15.15"
-        ["Verisign"]="64.6.64.6 64.6.65.6"
-        ["NTT"]="129.250.35.250 129.250.35.251"
-        ["DNS-XBOX"]="37.220.84.124"
+        ["Shecan"]="178.22.122.100 185.51.200.2"
+        ["Radar"]="10.202.10.10 10.202.10.11"
+        ["Electro"]="78.157.42.100 78.157.42.101"
+        ["Begzar"]="185.55.226.26 185.55.226.25"
+        ["403"]="10.202.10.202 10.202.10.102"
     )
-    load_custom
-}
-
-# ======================================================
-# LOAD CUSTOM DNS ENTRIES
-# ======================================================
-load_custom() {
+    # Load custom entries
     if [ -f "$CONFIG_FILE" ]; then
         while IFS='=' read -r key value; do
             [[ -z "$key" || "$key" =~ ^# ]] && continue
@@ -121,55 +53,37 @@ load_custom() {
     fi
 }
 
-# ======================================================
-# SAVE CUSTOM DNS ENTRY
-# ======================================================
-save_custom() {
-    local name="$1"
-    local ip1="$2"
-    local ip2="$3"
-    echo "${name}=${ip1} ${ip2}" >> "$CONFIG_FILE"
+# --- Check root ---
+check_root() {
+    if [ "$EUID" -ne 0 ]; then
+        dialog --title "Error" --msgbox "Please run as root:\nsudo $0" 8 40
+        exit 1
+    fi
 }
 
-# ======================================================
-# GET CURRENT DNS SERVERS
-# ======================================================
+# --- Get current DNS ---
 get_current_dns() {
-    local interface
-    interface=$(ip route get 1.1.1.1 2>/dev/null | grep -oP 'dev \K\S+')
-    if [ -z "$interface" ]; then
-        interface=$(ip -o link show | grep -v "lo:" | awk -F': ' '{print $2}' | head -n1)
-    fi
-    
+    local interface=$(ip route get 1.1.1.1 2>/dev/null | grep -oP 'dev \K\S+')
     if [ -n "$interface" ]; then
         resolvectl dns "$interface" 2>/dev/null | grep -v "Link" | grep -v "^$" || echo "No DNS set (DHCP)"
     else
-        grep "^nameserver" /etc/resolv.conf 2>/dev/null | awk '{print $2}' || echo "No DNS found"
+        echo "No interface found"
     fi
 }
 
-# ======================================================
-# GET DNS-OVER-TLS STATUS
-# ======================================================
+# --- Get DoT status ---
 get_dot_status() {
-    resolvectl status 2>/dev/null | grep "DNS-over-TLS" | head -n1 | awk '{print $NF}'
+    resolvectl status 2>/dev/null | grep "DNS-over-TLS" | head -n1 | awk '{print $NF}' || echo "unknown"
 }
 
-# ======================================================
-# CHANGE DNS USING RESOLVECTL
-# ======================================================
+# --- Set DNS ---
 set_dns() {
-    local provider_name="$1"
-    local dns_ips="$2"
-    local interface
-    
-    interface=$(ip route get 1.1.1.1 2>/dev/null | grep -oP 'dev \K\S+')
-    if [ -z "$interface" ]; then
-        interface=$(ip -o link show | grep -v "lo:" | awk -F': ' '{print $2}' | head -n1)
-    fi
+    local name="$1"
+    local ips="$2"
+    local interface=$(ip route get 1.1.1.1 2>/dev/null | grep -oP 'dev \K\S+')
     
     if [ -z "$interface" ]; then
-        dialog --title "Error" --msgbox "Could not detect network interface!" 6 40
+        dialog --msgbox "No network interface found!" 6 40
         return 1
     fi
     
@@ -177,54 +91,43 @@ set_dns() {
     cp /etc/resolv.conf "/etc/resolv.conf.bak.$(date +%Y%m%d_%H%M%S)" 2>/dev/null
     
     # Apply DNS
-    resolvectl dns "$interface" $dns_ips
+    resolvectl dns "$interface" $ips
     systemctl restart systemd-resolved 2>/dev/null
     resolvectl flush-caches 2>/dev/null
     
-    dialog --title "Success" --msgbox "DNS switched to: $provider_name\nServers: ${dns_ips// /, }" 8 50
+    dialog --title "Success" --msgbox "DNS switched to: $name\n\nServers: ${ips// /, }" 8 50
 }
 
-# ======================================================
-# TOGGLE DNS-OVER-TLS
-# ======================================================
+# --- Toggle DNS-over-TLS ---
 toggle_dot() {
-    local current_status
-    current_status=$(get_dot_status)
+    local current=$(get_dot_status)
     
-    if [[ "$current_status" == "yes" || "$current_status" == "opportunistic" ]]; then
+    if [[ "$current" == "yes" || "$current" == "opportunistic" ]]; then
         resolvectl dns-over-tls all no
-        systemctl restart systemd-resolved 2>/dev/null
-        dialog --title "DoT Disabled" --msgbox "DNS-over-TLS has been disabled." 6 40
+        systemctl restart systemd-resolved
+        dialog --title "DoT" --msgbox "DNS-over-TLS has been DISABLED" 6 40
     else
         resolvectl dns-over-tls all opportunistic
-        systemctl restart systemd-resolved 2>/dev/null
-        dialog --title "DoT Enabled" --msgbox "DNS-over-TLS has been enabled (opportunistic mode)." 6 40
+        systemctl restart systemd-resolved
+        dialog --title "DoT" --msgbox "DNS-over-TLS has been ENABLED (opportunistic)" 6 40
     fi
 }
 
-# ======================================================
-# RESET DNS TO DEFAULT (DHCP)
-# ======================================================
+# --- Reset to default ---
 reset_to_default() {
-    local interface
-    interface=$(ip route get 1.1.1.1 2>/dev/null | grep -oP 'dev \K\S+')
-    if [ -z "$interface" ]; then
-        interface=$(ip -o link show | grep -v "lo:" | awk -F': ' '{print $2}' | head -n1)
-    fi
+    local interface=$(ip route get 1.1.1.1 2>/dev/null | grep -oP 'dev \K\S+')
     
     if [ -n "$interface" ]; then
-        resolvectl revert "$interface" 2>/dev/null
-        systemctl restart systemd-resolved 2>/dev/null
-        resolvectl flush-caches 2>/dev/null
-        dialog --title "Reset Complete" --msgbox "DNS reverted to default (DHCP) on interface: $interface" 6 50
+        resolvectl revert "$interface"
+        systemctl restart systemd-resolved
+        resolvectl flush-caches
+        dialog --title "Reset" --msgbox "DNS reverted to default (DHCP) on: $interface" 6 50
     else
-        dialog --title "Error" --msgbox "Could not detect interface to revert." 6 40
+        dialog --msgbox "No interface found!" 6 40
     fi
 }
 
-# ======================================================
-# ADD CUSTOM DNS
-# ======================================================
+# --- Add custom DNS ---
 add_custom_dns() {
     local name=$(dialog --title "Add Custom DNS" --inputbox "Provider Name:" 8 40 3>&1 1>&2 2>&3)
     [ $? -ne 0 ] && return
@@ -235,159 +138,48 @@ add_custom_dns() {
     local ip2=$(dialog --title "Add Custom DNS" --inputbox "Secondary DNS IP (optional):" 8 40 "$ip1" 3>&1 1>&2 2>&3)
     [ $? -ne 0 ] && return
     
-    if [ -z "$name" ] || [ -z "$ip1" ]; then
-        dialog --title "Error" --msgbox "Name and Primary IP are required!" 6 40
-        return
-    fi
-    
-    if [ -z "$ip2" ]; then
-        ip2="$ip1"
-    fi
+    [ -z "$ip2" ] && ip2="$ip1"
     
     DNS_SERVERS["$name"]="$ip1 $ip2"
-    save_custom "$name" "$ip1" "$ip2"
+    echo "${name}=${ip1} ${ip2}" >> "$CONFIG_FILE"
     dialog --title "Success" --msgbox "Custom DNS '$name' added successfully!" 6 40
 }
 
-# ======================================================
-# DNS BENCHMARK (SIMPLE PING TEST)
-# ======================================================
-benchmark_dns() {
-    local servers=("8.8.8.8" "1.1.1.1" "9.9.9.9" "208.67.222.222" "94.140.14.14")
-    local results=()
-    local fastest=""
-    local fastest_time=999999
-    
-    {
-        echo "0"
-        echo "XXX"
-        echo "Starting DNS Benchmark..."
-        echo "XXX"
-        
-        for i in "${!servers[@]}"; do
-            local server="${servers[$i]}"
-            local avg_ping=$(ping -c 3 -q "$server" 2>/dev/null | awk -F/ '/^rtt/ {print $5}')
-            
-            if [ -n "$avg_ping" ]; then
-                results+=("$server: $avg_ping ms")
-                if (( $(echo "$avg_ping < $fastest_time" | bc -l 2>/dev/null || echo "0") )); then
-                    fastest_time=$avg_ping
-                    fastest=$server
-                fi
-            else
-                results+=("$server: TIMEOUT")
-            fi
-            
-            local percent=$(( (i + 1) * 100 / ${#servers[@]} ))
-            echo "$percent"
-            echo "XXX"
-            echo "Testing $server ... ($((i + 1))/${#servers[@]})"
-            echo "XXX"
-        done
-        
-        echo "100"
-        echo "XXX"
-        echo "Benchmark Complete!"
-        echo "Fastest: $fastest ($fastest_time ms)"
-        echo "XXX"
-    } | dialog --title "DNS Benchmark" --gauge "Initializing..." 10 70 0
-    
-    if [ -n "$fastest" ]; then
-        dialog --title "Benchmark Results" --yesno "Fastest DNS: $fastest ($fastest_time ms)\n\nDo you want to set it as primary DNS?" 10 60
-        if [ $? -eq 0 ]; then
-            set_dns "Benchmark Winner" "$fastest"
-        fi
-    else
-        dialog --msgbox "No responsive DNS servers found." 6 40
-    fi
-}
-
-# ======================================================
-# RESOLVE DOMAIN (DIG)
-# ======================================================
-resolve_domain() {
-    local domain=$(dialog --title "Resolve Domain" --inputbox "Enter domain name:" 8 40 "google.com" 3>&1 1>&2 2>&3)
-    [ $? -ne 0 ] && return
-    
-    local result=$(dig +short "$domain" | head -10)
-    if [ -z "$result" ]; then
-        result="No IP found or domain does not exist."
-    fi
-    
-    dialog --title "Resolve Result for $domain" --msgbox "$result" 20 60
-}
-
-# ======================================================
-# SHOW NETWORK INFORMATION
-# ======================================================
-show_network_info() {
-    local info=""
-    info+="===== System Information =====\n"
-    info+="Hostname: $(hostname)\n"
-    info+="Kernel: $(uname -r)\n"
-    info+="OS: $(lsb_release -ds 2>/dev/null || cat /etc/os-release | grep PRETTY_NAME | cut -d= -f2 | tr -d '\"')\n\n"
-    
-    info+="===== Network Interfaces =====\n"
-    info+="$(ip -br addr show | grep -v lo)\n\n"
-    
-    info+="===== Current DNS Servers =====\n"
-    info+="$(get_current_dns)\n\n"
-    
-    info+="===== DNS-over-TLS Status =====\n"
-    info+="$(get_dot_status)\n\n"
-    
-    info+="===== Routing Table =====\n"
-    info+="$(ip route | grep default)"
-    
-    dialog --title "Network Information" --msgbox "$info" 25 70
-}
-
-# ======================================================
-# MAIN MENU
-# ======================================================
+# --- Main menu ---
 main_menu() {
     while true; do
-        # Get current info for display
         local current_dns=$(get_current_dns | head -2 | tr '\n' ' ')
         local dot_status=$(get_dot_status)
         
-        # Build menu options
-        local menu_options=()
-        menu_options+=("1" "Change DNS Server")
-        menu_options+=("2" "Add Custom DNS")
-        menu_options+=("3" "DNS Benchmark")
-        menu_options+=("4" "Resolve Domain")
-        menu_options+=("5" "Network Information")
-        menu_options+=("6" "Toggle DNS-over-TLS")
-        menu_options+=("7" "Reset to Default (DHCP)")
-        menu_options+=("8" "Exit")
-        
-        local choice=$(dialog --clear --title "DNS Master Pro - Graphical Edition" \
-            --menu "Current DNS: $current_dns\nDoT Status: $dot_status\n\nSelect an option:" \
-            $DIALOG_HEIGHT $DIALOG_WIDTH 8 \
-            "${menu_options[@]}" \
+        local choice=$(dialog --clear --title "DNS Master Pro" \
+            --menu "Current DNS: $current_dns\nDoT: $dot_status\n\nSelect option:" 20 70 8 \
+            1 "Change DNS Server" \
+            2 "Add Custom DNS" \
+            3 "Toggle DNS-over-TLS" \
+            4 "Reset to Default (DHCP)" \
+            5 "Exit" \
             3>&1 1>&2 2>&3)
         
         case $choice in
             1)
-                # Show list of DNS providers
-                local provider_list=()
-                local provider_names=()
+                # Build provider list
+                local list=()
+                local names=()
                 local i=1
                 for provider in $(printf '%s\n' "${!DNS_SERVERS[@]}" | sort); do
-                    provider_list+=("$i" "$provider - ${DNS_SERVERS[$provider]}")
-                    provider_names+=("$provider")
+                    list+=("$i" "$provider - ${DNS_SERVERS[$provider]}")
+                    names+=("$provider")
                     ((i++))
                 done
                 
-                local selected=$(dialog --clear --title "Select DNS Provider" \
-                    --menu "Choose a DNS provider:" 20 70 15 \
-                    "${provider_list[@]}" \
+                local sel=$(dialog --clear --title "Select DNS Provider" \
+                    --menu "Choose a provider:" 20 70 10 \
+                    "${list[@]}" \
                     3>&1 1>&2 2>&3)
                 
-                if [ -n "$selected" ] && [ "$selected" -ge 1 ] && [ "$selected" -le "${#provider_names[@]}" ]; then
-                    local idx=$((selected - 1))
-                    local prov="${provider_names[$idx]}"
+                if [ -n "$sel" ] && [ "$sel" -ge 1 ] 2>/dev/null; then
+                    local idx=$((sel - 1))
+                    local prov="${names[$idx]}"
                     set_dns "$prov" "${DNS_SERVERS[$prov]}"
                 fi
                 ;;
@@ -395,34 +187,25 @@ main_menu() {
                 add_custom_dns
                 ;;
             3)
-                benchmark_dns
-                ;;
-            4)
-                resolve_domain
-                ;;
-            5)
-                show_network_info
-                ;;
-            6)
                 toggle_dot
                 ;;
-            7)
+            4)
                 reset_to_default
                 ;;
-            8|"")
+            5|"")
                 dialog --clear --title "Goodbye" --msgbox "Stay secure!" 6 30
                 clear
+                echo "DNS Master Pro exited."
                 exit 0
                 ;;
         esac
     done
 }
 
-# ======================================================
-# MAIN EXECUTION
-# ======================================================
+# --- Main ---
 clear
-auto_install_deps
-check_root
+echo "Starting DNS Master Pro..."
+sleep 1
 init_defaults
+check_root
 main_menu
